@@ -1,5 +1,5 @@
 // pages/api/generatePdf.js
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,13 +17,23 @@ export default async function handler(req, res) {
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const fontSize = 12;
+    const margin = 50;
+    const maxWidth = width - 2 * margin;
 
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const lines = letter.split("\n");
-    let yPosition = height - 40;
+    let yPosition = height - margin;
 
     for (const line of lines) {
-      page.drawText(line, { x: 50, y: yPosition, size: fontSize });
-      yPosition -= fontSize + 4; // Line spacing
+      const wrappedLines = font.splitTextIntoLines(line, maxWidth, fontSize);
+      for (const wrappedLine of wrappedLines) {
+        if (yPosition < margin) {
+          page = pdfDoc.addPage();
+          yPosition = height - margin;
+        }
+        page.drawText(wrappedLine, { x: margin, y: yPosition, size: fontSize, font });
+        yPosition -= fontSize + 4; // Line spacing
+      }
     }
 
     const pdfBytes = await pdfDoc.save();
@@ -34,4 +44,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
-
