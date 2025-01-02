@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 	  name : "memer_one"
   };
   const from_whome = "this letter is from" + user_info.name + "Use this name for your name as well as SCET as the address"; 
-  const to_whome = "address this letter to The Principal Of Sahrdaya Collage Of Engineering Technology The localtion is Kodakara";
+  const to_whome = "address this letter to The Principal Of Sahrdaya College Of Engineering Technology The location is Kodakara";
   const message = req.body.prompt + "write a letter regarding this topic Make it formal fill in the details only given" + to_whome + from_whome;
 	
   // console.log(message);

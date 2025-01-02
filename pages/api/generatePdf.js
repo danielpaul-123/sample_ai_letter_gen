@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
   try {
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage();
+    let page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const fontSize = 12;
     const margin = 50;
@@ -24,8 +24,27 @@ export default async function handler(req, res) {
     const lines = letter.split("\n");
     let yPosition = height - margin;
 
+    const wrapText = (text, maxWidth, fontSize, font) => {
+      const words = text.split(" ");
+      let lines = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = font.widthOfTextAtSize(currentLine + " " + word, fontSize);
+        if (width < maxWidth) {
+          currentLine += " " + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
+    };
+
     for (const line of lines) {
-      const wrappedLines = font.splitTextIntoLines(line, maxWidth, fontSize);
+      const wrappedLines = wrapText(line, maxWidth, fontSize, font);
       for (const wrappedLine of wrappedLines) {
         if (yPosition < margin) {
           page = pdfDoc.addPage();
